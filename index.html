@@ -6,45 +6,67 @@
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    /* ---------- GLOBAL ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #dfffe2, #ffffff);
-      margin: 0;
-      padding: 20px;
+      background: linear-gradient(to bottom right, #d4f7dc, #f8fff9);
       color: #2c3e50;
+      padding: 20px;
     }
     h1 {
       text-align: center;
       color: #1a6f3f;
-      margin-bottom: 20px;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      margin-bottom: 25px;
     }
+
+    /* ---------- GRID ---------- */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 20px;
     }
+
+    /* ---------- CARD ---------- */
     .card {
       background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-radius: 18px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
       padding: 20px;
       text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
     }
     .title {
-      font-weight: bold;
+      font-weight: 600;
       margin-bottom: 10px;
       color: #155d32;
+      font-size: 1.1rem;
     }
     .value {
-      font-size: 1.6em;
-      margin: 5px 0;
+      font-size: 1.7rem;
+      margin: 8px 0;
+      font-weight: bold;
+      color: #2c3e50;
     }
+
+    /* ---------- BUTTONS & INPUTS ---------- */
     button, input, select {
-      padding: 8px 14px;
-      border-radius: 8px;
+      padding: 10px 16px;
+      border-radius: 10px;
       border: none;
       cursor: pointer;
-      margin: 5px;
+      margin: 6px;
+      font-size: 0.95rem;
+      transition: 0.2s ease;
     }
     button {
       background: #27ae60;
@@ -55,16 +77,39 @@
       background: #e74c3c;
     }
     button:hover {
-      opacity: 0.9;
+      transform: scale(1.05);
+      opacity: 0.95;
+    }
+    select, input {
+      border: 1px solid #ccc;
+      width: auto;
+      min-width: 80px;
     }
     input {
-      border: 1px solid #ccc;
-      width: 70px;
       text-align: center;
     }
+
+    /* ---------- CANVAS ---------- */
     canvas {
-      max-width: 200px;
-      margin: auto;
+      max-width: 180px;
+      margin: 10px auto;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      .card {
+        padding: 15px;
+      }
+      .value {
+        font-size: 1.4rem;
+      }
+      button, input, select {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+      }
     }
   </style>
 </head>
@@ -159,7 +204,6 @@
   });
 
   function updateUI(d) {
-    // Soil moisture
     if ("moisture" in d) {
       moistGauge.data.datasets[0].data = [d.moisture, 100 - d.moisture];
       moistGauge.update();
