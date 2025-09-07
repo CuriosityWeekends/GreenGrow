@@ -22,7 +22,27 @@
       text-align: center;
       color: #1a6f3f;
       font-size: clamp(1.8rem, 4vw, 2.5rem);
+      margin-bottom: 10px;
+    }
+
+    /* ---------- PRESENTATION LINK ---------- */
+    .presentation-link {
+      display: flex;
+      justify-content: center;
       margin-bottom: 25px;
+    }
+    .presentation-link a {
+      background: #1a6f3f;
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: 0.3s ease;
+    }
+    .presentation-link a:hover {
+      background: #27ae60;
+      transform: scale(1.05);
     }
 
     /* ---------- GRID ---------- */
@@ -32,6 +52,13 @@
       gap: 20px;
     }
 
+    /* Force single column on mobile */
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     /* ---------- CARD ---------- */
     .card {
       background: #fff;
@@ -39,7 +66,15 @@
       box-shadow: 0 6px 18px rgba(0,0,0,0.08);
       padding: 20px;
       text-align: center;
-      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      width: 100%;
+      opacity: 0; /* start hidden for animation */
+      transform: translateY(30px);
+    }
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: all 0.6s ease-out;
     }
     .card:hover {
       transform: translateY(-4px);
@@ -82,7 +117,6 @@
     }
     select, input {
       border: 1px solid #ccc;
-      width: auto;
       min-width: 80px;
     }
     input {
@@ -115,6 +149,12 @@
 </head>
 <body>
   <h1>🌱 GreenGrow Dashboard</h1>
+  
+  <!-- Presentation Link -->
+  <div class="presentation-link">
+    <a href="https://greengrow-smart-irrigati-uhoxojr.gamma.site/" target="_blank">📊 View Presentation</a>
+  </div>
+
   <div class="grid">
     <!-- Soil Moisture -->
     <div class="card">
@@ -242,6 +282,21 @@
       client.publish("greengrow/moisture/set", val);
     }
   }
+
+  // Fade-in animation for cards on scroll
+  const cards = document.querySelectorAll('.card');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  cards.forEach(card => {
+    observer.observe(card);
+  });
 </script>
 </body>
 </html>
