@@ -2,222 +2,194 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>🌱 GreenGrow Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GreenGrow Dashboard</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    /* ---------- GLOBAL ---------- */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --primary-green: #27ae60;
-      --primary-dark: #155d32;
-      --glass-bg: rgba(255, 255, 255, 0.15);
-      --glass-border: rgba(255, 255, 255, 0.3);
-      --text-dark: #1e272e;
-      --text-light: #ecf0f1;
-      --shadow: 0 8px 25px rgba(0,0,0,0.2);
-    }
 
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #d4f7dc, #f8fff9);
+      color: #2c3e50;
+      padding: 20px;
+      transition: all 0.4s ease;
       min-height: 100vh;
-      background: linear-gradient(135deg, #b8f3c4, #f8fff9);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-      color: var(--text-dark);
-      transition: background 0.5s ease, color 0.5s ease;
     }
-    body.dark {
+    body.dark-mode {
       background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: var(--text-light);
+      color: #f0f0f0;
     }
 
     h1 {
-      font-size: clamp(1.8rem, 5vw, 3rem);
-      font-weight: 700;
-      margin-bottom: 1rem;
       text-align: center;
-      color: var(--primary-dark);
+      color: #1a6f3f;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      margin-bottom: 20px;
     }
-    body.dark h1 { color: #00ffb3; }
+    body.dark-mode h1 { color: #4cd964; }
 
-    /* ---------- DARK MODE TOGGLE ---------- */
-    .toggle-dark {
-      position: absolute;
+    /* Toggle Button */
+    .toggle-btn {
+      position: fixed;
       top: 20px;
       right: 20px;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 50%;
-      width: 45px;
-      height: 45px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: #1a6f3f;
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 50px;
       cursor: pointer;
-      backdrop-filter: blur(10px);
-      color: var(--primary-dark);
-      box-shadow: var(--shadow);
-      transition: all 0.3s ease;
+      font-weight: bold;
+      transition: 0.3s ease;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
-    body.dark .toggle-dark {
-      color: #00ffb3;
-      border: 1px solid #00ffb3;
-    }
+    body.dark-mode .toggle-btn { background: #4cd964; color: #000; }
 
-    /* ---------- PRESENTATION LINK ---------- */
+    /* Presentation Link */
     .presentation-link {
       display: flex;
       justify-content: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 25px;
     }
     .presentation-link a {
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      padding: 0.9rem 1.6rem;
-      border-radius: 14px;
+      background: #1a6f3f;
+      color: #fff;
       text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 12px;
       font-weight: 600;
-      color: var(--primary-dark);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      transition: all 0.3s ease;
+      transition: 0.3s ease;
+      font-size: clamp(0.9rem, 2vw, 1rem);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
-    .presentation-link a:hover {
-      background: rgba(39, 174, 96, 0.3);
-      color: #fff;
-      transform: translateY(-3px);
-    }
-    body.dark .presentation-link a {
-      border: 1px solid #00ffb3;
-      color: #00ffb3;
-    }
-    body.dark .presentation-link a:hover {
-      background: rgba(0,255,179,0.25);
-      color: #fff;
-    }
+    .presentation-link a:hover { transform: scale(1.05); }
+    body.dark-mode .presentation-link a { background: #4cd964; color: #000; }
 
-    /* ---------- GRID ---------- */
+    /* Grid Layout */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.5rem;
-      width: 100%;
-      max-width: 1200px;
-      margin-top: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      flex: 1;
     }
 
-    /* ---------- CARD ---------- */
+    /* Card Style */
     .card {
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
       border-radius: 20px;
-      box-shadow: var(--shadow);
-      padding: 1.5rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      padding: 20px;
       text-align: center;
-      backdrop-filter: blur(15px);
-      transition: all 0.4s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: all 0.6s ease-out;
     }
     .card:hover {
-      transform: translateY(-6px) scale(1.02);
-      box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+      transform: translateY(-6px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.2);
     }
-    .card i {
-      font-size: clamp(1.5rem, 3vw, 2.2rem);
-      margin-bottom: 0.6rem;
-      color: var(--primary-green);
+    body.dark-mode .card {
+      background: rgba(44, 44, 44, 0.85);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
     }
-    body.dark .card i { color: #00ffb3; }
-    .title { font-weight: 600; font-size: 1.05rem; margin-bottom: 0.6rem; }
-    .value { font-size: clamp(1.2rem, 4vw, 1.8rem); font-weight: 700; }
 
-    /* ---------- BUTTONS & INPUTS ---------- */
+    /* Titles & Values */
+    .title {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #155d32;
+      font-size: clamp(1rem, 2vw, 1.2rem);
+    }
+    body.dark-mode .title { color: #4cd964; }
+    .value {
+      font-size: clamp(1.4rem, 3vw, 1.8rem);
+      margin: 8px 0;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    body.dark-mode .value { color: #f0f0f0; }
+
+    /* Buttons */
     button, input, select {
-      padding: 0.6rem 1.2rem;
-      border-radius: 12px;
+      padding: 10px 16px;
+      border-radius: 10px;
       border: none;
       cursor: pointer;
-      margin: 0.3rem;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      max-width: 100%;
+      margin: 6px;
+      font-size: clamp(0.8rem, 2vw, 0.95rem);
+      transition: 0.2s ease;
     }
-    button {
-      background: var(--primary-green);
-      color: white;
-      box-shadow: 0 3px 12px rgba(39,174,96,0.3);
-    }
+    button { background: #27ae60; color: white; font-weight: bold; }
     button.off { background: #e74c3c; }
-    button:hover { transform: translateY(-2px); opacity: 0.9; }
+    button:hover { transform: scale(1.05); opacity: 0.95; }
+
+    /* Inputs */
     select, input {
-      background: rgba(255,255,255,0.9);
-      border: 1px solid var(--glass-border);
-      color: var(--text-dark);
-      font-weight: 500;
+      border: 1px solid #ccc;
+      min-width: 80px;
+      background: #fff;
     }
-    body.dark select, body.dark input {
-      background: rgba(0,0,0,0.4);
-      color: var(--text-light);
-      border: 1px solid #00ffb3;
+    body.dark-mode select, body.dark-mode input {
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
     }
+    input { text-align: center; max-width: 100px; }
 
-    /* ---------- CANVAS ---------- */
-    canvas { max-width: 140px; margin: 10px auto; }
+    /* Charts */
+    canvas { max-width: 200px; width: 100%; margin: 10px auto; }
 
-    /* ---------- RESPONSIVE ---------- */
+    /* Responsive */
     @media (max-width: 768px) {
-      body { padding: 1rem; }
-      h1 { font-size: 1.8rem; }
-      .grid { grid-template-columns: 1fr; }
-      .card { padding: 1.2rem; }
-      button, input, select { width: 100%; }
-      canvas { max-width: 120px; }
+      body { padding: 15px; }
+      .card { padding: 15px; opacity: 1 !important; transform: none !important; }
+      .value { font-size: 1.5rem; }
+    }
+    @media (max-width: 480px) {
+      body { padding: 10px; }
+      .card { padding: 12px; }
+      .value { font-size: 1.3rem; }
+      button, input, select { padding: 8px 12px; font-size: 0.85rem; }
     }
   </style>
 </head>
 <body>
+  <button class="toggle-btn" onclick="toggleDarkMode()">🌙 Dark</button>
   <h1>🌱 GreenGrow Dashboard</h1>
-  <div class="toggle-dark" onclick="toggleDark()"><i class="fas fa-moon"></i></div>
-
   <div class="presentation-link">
-    <a href="https://greengrow-smart-irrigati-uhoxojr.gamma.site/" target="_blank">
-      📊 View Presentation
-    </a>
+    <a href="https://greengrow-smart-irrigati-uhoxojr.gamma.site/" target="_blank">📊 View Presentation</a>
   </div>
-
   <div class="grid">
     <div class="card">
-      <i class="fas fa-tint"></i>
       <div class="title">Soil Moisture</div>
       <canvas id="moistGauge"></canvas>
       <div class="value" id="moistText">-- %</div>
     </div>
-
     <div class="card">
-      <i class="fas fa-temperature-high"></i>
       <div class="title">Temperature</div>
       <div class="value" id="temp">-- °C</div>
     </div>
-
     <div class="card">
-      <i class="fas fa-water"></i>
       <div class="title">Humidity</div>
       <div class="value" id="humidity">-- %</div>
     </div>
-
     <div class="card">
-      <i class="fas fa-cloud-rain"></i>
       <div class="title">Rain Status</div>
       <div class="value" id="rain">--</div>
     </div>
-
     <div class="card">
-      <i class="fas fa-faucet"></i>
-      <div class="title">Water Pump Control</div>
+      <div class="title">Water Pump</div>
       <div>
         <select id="modeSelect">
           <option value="auto">Auto</option>
@@ -225,31 +197,46 @@
         </select>
       </div>
       <div id="manualBtns" style="display:none;">
-        <button onclick="setPump('on')">ON</button>
-        <button class="off" onclick="setPump('off')">OFF</button>
+        <button onclick="setRelay('on')">ON</button>
+        <button class="off" onclick="setRelay('off')">OFF</button>
       </div>
-      <div class="value" id="pumpState">--</div>
+      <div class="value" id="relayState">--</div>
     </div>
-
     <div class="card">
-      <i class="fas fa-sliders-h"></i>
       <div class="title">Moisture Threshold</div>
-      <input type="number" id="thresholdInput" min="0" max="100" placeholder="Set %">
+      <input type="number" id="thresholdInput" min="0" max="100"> %
       <button onclick="setThreshold()">Set</button>
       <div class="value" id="thresholdVal">-- %</div>
     </div>
   </div>
 
 <script>
+  // Dark/Light toggle with memory
+  function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+    const btn = document.querySelector(".toggle-btn");
+    if (document.body.classList.contains("dark-mode")) {
+      btn.innerText = "☀️ Light";
+      localStorage.setItem("theme", "dark");
+    } else {
+      btn.innerText = "🌙 Dark";
+      localStorage.setItem("theme", "light");
+    }
+  }
+  window.onload = () => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark-mode");
+      document.querySelector(".toggle-btn").innerText = "☀️ Light";
+    }
+  };
+
   // MQTT
   const clientId = "web-" + Math.random().toString(16).substr(2, 6);
   const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId });
-
   client.on("connect", () => {
-    console.log("Connected to MQTT");
     client.subscribe("greengrow/data");
   });
-
   client.on("message", (topic, message) => {
     if (topic === "greengrow/data") {
       let data = {};
@@ -258,14 +245,14 @@
     }
   });
 
-  // Chart.js gauge
+  // Moisture Gauge
   const ctx = document.getElementById('moistGauge');
   const moistGauge = new Chart(ctx, {
     type: 'doughnut',
     data: {
       datasets: [{
         data: [0, 100],
-        backgroundColor: ['#2ecc71', '#ecf0f1'],
+        backgroundColor: ['#27ae60', '#ecf0f1'],
         borderWidth: 0
       }]
     },
@@ -286,10 +273,10 @@
     if ("temp" in d) document.getElementById("temp").innerText = d.temp + " °C";
     if ("humidity" in d) document.getElementById("humidity").innerText = d.humidity + " %";
     if ("rain" in d) {
-      document.getElementById("rain").innerText = (d.rain === "Rainy" ? "🌧️ Rainy" : "🌞 Sunny");
+      document.getElementById("rain").innerText = (d.rain === "Rainy" ? "🌧 Rainy" : "🌞 Sunny");
     }
-    if ("pump" in d) {
-      document.getElementById("pumpState").innerText = "Pump: " + d.pump;
+    if ("relay" in d) {
+      document.getElementById("relayState").innerText = "Relay: " + d.relay;
     }
     if ("mode" in d) {
       document.getElementById("modeSelect").value = d.mode.toLowerCase();
@@ -300,25 +287,31 @@
     }
   }
 
-  // Controls
   document.getElementById("modeSelect").addEventListener("change", e => {
-    client.publish("greengrow/pump/mode", e.target.value);
+    client.publish("greengrow/relay/mode", e.target.value);
     document.getElementById("manualBtns").style.display = (e.target.value === "manual" ? "block" : "none");
   });
 
-  function setPump(state) {
-    client.publish("greengrow/pump/control", state);
-  }
+  function setRelay(state) { client.publish("greengrow/relay/control", state); }
   function setThreshold() {
     const val = document.getElementById("thresholdInput").value;
-    if (val !== "") {
-      client.publish("greengrow/moisture/set", val);
-    }
+    if (val !== "") client.publish("greengrow/moisture/set", val);
   }
 
-  // Dark mode
-  function toggleDark() {
-    document.body.classList.toggle("dark");
+  // Card animation
+  if (window.innerWidth > 768) {
+    const cards = document.querySelectorAll('.card');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    cards.forEach(card => { observer.observe(card); });
+  } else {
+    document.querySelectorAll('.card').forEach(c => c.classList.add('visible'));
   }
 </script>
 </body>
